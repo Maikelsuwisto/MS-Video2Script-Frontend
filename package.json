@@ -4,9 +4,10 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "start": "vite preview --port $PORT --host"
+  "dev": "vite",
+  "build": "tsc -b && vite build",
+  "start": "vite preview --port $PORT --host",
+  "preview": "vite preview --port $PORT --host"
   },
   "dependencies": {
     "@ffmpeg/core": "^0.12.10",
