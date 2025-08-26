@@ -1,0 +1,71 @@
+import React, { useRef, useState } from 'react'
+const [withTs, setWithTs] = useState<boolean>(false)
+const [busy, setBusy] = useState<boolean>(false)
+
+
+const pick = () => fileRef.current?.click()
+const onPick = (e: React.ChangeEvent<HTMLInputElement>) => {
+const f = e.target.files?.[0]
+if (f) setFile(f)
+}
+
+
+const run = async () => {
+if (!file) return
+setBusy(true)
+setProgress(0)
+setStatus('Preparing...')
+
+
+try {
+let payload: Blob = file
+const sizeMB = file.size / (1024 * 1024)
+
+
+if (sizeMB > SIZE_THRESHOLD_MB) {
+setStatus(`Large file (${sizeMB.toFixed(1)} MB). Converting to audio in your browser...`)
+setProgress(10)
+payload = await videoToWavBlob(file)
+setProgress(40)
+} else {
+setStatus(`Small file (${sizeMB.toFixed(1)} MB). Uploading to server...`)
+setProgress(20)
+}
+
+
+setStatus('Transcribing...')
+setProgress(60)
+const res = await transcribeFile(payload, withTs)
+setProgress(95)
+
+
+if (res.error) throw new Error(res.error)
+onDone(res.text || '')
+setStatus('Done!')
+setProgress(100)
+} catch (e: any) {
+setStatus(e?.message || 'Error')
+setProgress(0)
+} finally {
+setBusy(false)
+}
+}
+
+
+return (
+<div style={{ border: '1px solid #ddd', borderRadius: 16, padding: 16 }}>
+<input ref={fileRef} type="file" accept="video/*,audio/*" onChange={onPick} hidden />
+
+
+<div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 12 }}>
+<button onClick={pick} style={{ padding: '8px 14px', borderRadius: 10 }}>📂 Choose File</button>
+<span>{file ? file.name : 'No file selected'}</span>
+</div>
+
+
+<label style={{ display: 'flex', gap: 8, alignItems: 'center', margin: '8px 0 16px' }}>
+<input type="checkbox" checked={withTs} onChange={e => setWithTs(e.target.checked)} /> Include timestamps
+</label>
+
+
+<bu

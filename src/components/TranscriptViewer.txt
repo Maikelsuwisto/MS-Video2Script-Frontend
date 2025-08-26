@@ -1,0 +1,10 @@
+export default function TranscriptViewer({ text }: { text: string }) {
+return (
+<textarea
+value={text}
+readOnly
+spellCheck={false}
+style={{ width: '100%', height: 320, padding: 12, borderRadius: 12 }}
+/>
+)
+}
