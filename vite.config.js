@@ -4,9 +4,10 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   build: {
-    outDir: '../build', // output build directly into backend/build
+    outDir: '../build', // output build into backend/build
   },
   preview: {
+    allowedHosts: ['.railway.app', 'web-production-3f9e.up.railway.app'],
     port: process.env.PORT || 4173,
     host: true,
   },
