@@ -6,7 +6,8 @@ export default defineConfig({
     react(),
     {
       build: {
-        outDir: '../build', // output build into backend/build
+        outDir: '..backend/build', // output build into backend/build
+        emptyOutDir: true
       },
     }
   ],
