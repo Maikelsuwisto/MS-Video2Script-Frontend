@@ -5,10 +5,14 @@ export default defineConfig({
   plugins: [
     react(),
     {
-      build: {
-        outDir: '..backend/build', // output build into backend/build
-        emptyOutDir: true
-      },
+      name: 'CrossOriginIsolationPlugin',
+      configureServer(server) {
+        server.middlewares.use((_req, res, next) => {
+          res.setHeader('Cross-Origin-Opener-Policy', 'same-origin')
+          res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp')
+          next()
+        })
+      }
     }
   ],
   preview: {

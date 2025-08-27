@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
-import { createFFmpeg, fetchFile } from "@ffmpeg/ffmpeg";
 
 interface Sentence {
   start?: string;
@@ -17,24 +16,6 @@ const App: React.FC = () => {
   const [progress, setProgress] = useState(0);
   const [previewText, setPreviewText] = useState("");
 
-  const [ffmpegReady, setFfmpegReady] = useState(false);
-  const ffmpeg = createFFmpeg({ log: true });
-
-  // Load ffmpeg.wasm once
-  useEffect(() => {
-    const loadFFmpeg = async () => {
-      try {
-        console.log("Loading ffmpeg.wasm...");
-        await ffmpeg.load();
-        console.log("✅ ffmpeg.wasm loaded successfully");
-        setFfmpegReady(true);
-      } catch (err) {
-        console.error("❌ Failed to load ffmpeg.wasm:", err);
-      }
-    };
-    loadFFmpeg();
-  }, []);
-
   const getTranscribeButtonText = () =>
     withTimestamps ? "🚀 Transcribe with Timestamps" : "🚀 Transcribe without Timestamps";
 
@@ -48,7 +29,7 @@ const App: React.FC = () => {
 
   // Fake alive progress bar
   useEffect(() => {
-    let interval: number | undefined;
+    let interval: number | undefined; // declare before if-block
 
     if (loading) {
       setProgress(0);
@@ -63,32 +44,10 @@ const App: React.FC = () => {
     }
 
     return () => {
-      if (interval) window.clearInterval(interval);
+      if (interval) window.clearInterval(interval); // safe now
     };
   }, [loading]);
 
-  // Optional: test ffmpeg conversion for the selected file
-  const testFFmpeg = async (file: File) => {
-    if (!ffmpegReady) return;
-
-    try {
-      console.log("Writing file to ffmpeg FS...");
-      ffmpeg.FS("writeFile", "input.mp4", await fetchFile(file));
-
-      console.log("Running ffmpeg conversion...");
-      // Convert to WAV (mono, 16kHz) just for testing
-      await ffmpeg.run("-i", "input.mp4", "-t", "5", "-ar", "16000", "-ac", "1", "output.wav");
-
-      const data = ffmpeg.FS("readFile", "output.wav");
-      console.log("✅ ffmpeg conversion successful, output bytes:", data.length);
-
-      const audioBlob = new Blob([new Uint8Array(data)], { type: "audio/wav" });
-      const audioTestUrl = URL.createObjectURL(audioBlob);
-      setAudioUrl(audioTestUrl);
-    } catch (err) {
-      console.error("❌ ffmpeg conversion failed:", err);
-    }
-  };
 
   const generateTranscription = async () => {
     if (!video) return;
@@ -136,6 +95,7 @@ const App: React.FC = () => {
       setPreviewText(textLines.join("\n\n"));
       setAudioUrl(data.audio_url || null);
 
+      // Calculate total time
       const endTime = Date.now();
       const totalSeconds = Math.floor((endTime - startTime) / 1000);
       const minutes = Math.floor(totalSeconds / 60);
@@ -172,11 +132,7 @@ const App: React.FC = () => {
             <input
               type="file"
               accept="video/*"
-              onChange={async (e) => {
-                const file = e.target.files?.[0] || null;
-                setVideo(file);
-                if (file) await testFFmpeg(file); // Run ffmpeg test on selection
-              }}
+              onChange={(e) => setVideo(e.target.files?.[0] || null)}
               style={{ display: "none" }}
               id="fileInput"
             />
